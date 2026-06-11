@@ -1,3 +1,5 @@
-module github.com/berti/go-social
+module github.com/Bertin-Dreyer/go-social
 
-go 1.21
+go 1.26
+
+require github.com/go-chi/chi/v5 v5.3.0 // indirect

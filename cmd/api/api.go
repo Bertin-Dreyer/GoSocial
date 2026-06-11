@@ -21,7 +21,13 @@ type config struct {
 func (app *application) mount() *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
+	r.Use(middleware.RequestID)
+  r.Use(middleware.ClientIPFromRemoteAddr) // pick one ClientIPFrom* based on your infra, see below
+  r.Use(middleware.Logger)
+  r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(60 * time.Second))
+
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)

@@ -3,14 +3,18 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"time"
 )
 
+var ErrNilDB = errors.New("database connection is nil")
+
 type User struct {
-	ID					int64		`json:"id"`
+	ID				int64		`json:"id"`
 	Username		string	`json:"username"`
-	Email				string 	`json:"email"`
-	Password		string 	`json:"-"`
-	CreatedAt 	string 	`json:"created_at"`
+	Email			string	`json:"email"`
+	Password		string	`json:"-"`
+	CreatedAt		time.Time	`json:"created_at"`
 }
 
 type UsersStore struct {
@@ -18,6 +22,9 @@ type UsersStore struct {
 }
 
 func (s *UsersStore) Create(ctx context.Context, user *User) error {
+	if s.db == nil {
+		return ErrNilDB
+	}
 	query := `
 		INSERT INTO users (username, password, email)
 		VALUES ($1, $2, $3)

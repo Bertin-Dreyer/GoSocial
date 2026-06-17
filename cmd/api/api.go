@@ -11,22 +11,30 @@ import (
 )
 
 type application struct {
-	config config
-	store store.Storage
+	config 	config
+	store 	store.Storage
 }
 
 type config struct {
 	// Server address
-	addr string
+	addr 		string
+	db 			dbConfig
+}
+
+type dbConfig struct {
+	addr					string
+	maxOpenConns 	int
+	maxIdleConns 	int
+	maxIdleTime 	string
 }
 
 func (app *application) mount() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-  r.Use(middleware.ClientIPFromRemoteAddr) // pick one ClientIPFrom* based on your infra, see below
-  r.Use(middleware.Logger)
-  r.Use(middleware.Recoverer)
+	r.Use(middleware.ClientIPFromRemoteAddr) // pick one ClientIPFrom* based on your infra, see below
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	r.Use(middleware.Timeout(60 * time.Second))
 
@@ -39,13 +47,13 @@ func (app *application) mount() *chi.Mux {
 }
 
 func (app *application) run(mux *chi.Mux) error {
-
 	srv := http.Server{
-		Addr:    app.config.addr,
-		Handler: mux,
-		WriteTimeout: time.Second * 10,
-		ReadTimeout: time.Second * 5,
-		IdleTimeout: time.Minute,
+		Addr:         app.config.addr,
+		Handler:      mux,
+		ReadTimeout:  120 * time.Second,
+		WriteTimeout: 120 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		ReadHeaderTimeout: 60 * time.Second,
 	}
 
 	log.Printf("Server has started at %s", app.config.addr)
